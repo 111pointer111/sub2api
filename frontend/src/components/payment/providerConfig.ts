@@ -133,6 +133,7 @@ export const PROVIDER_CONFIG_FIELDS: Record<string, ConfigFieldDef[]> = {
     { key: 'cidWxpay', label: '', sensitive: false, optional: true },
   ],
   alipay: [
+    { key: 'environment', label: '', sensitive: false, optional: true, defaultValue: 'production', hintKey: 'admin.settings.payment.field_alipayEnvironmentHint', options: [{ value: 'production', label: 'Production' }, { value: 'sandbox', label: 'Sandbox' }] },
     { key: 'appId', label: 'App ID', sensitive: false },
     { key: 'privateKey', label: '', sensitive: true },
     { key: 'publicKey', label: '', sensitive: true },

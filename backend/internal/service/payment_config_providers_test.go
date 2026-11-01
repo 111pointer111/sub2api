@@ -506,6 +506,15 @@ func TestUpdateProviderInstanceRejectsProtectedConfigChangesWhilePendingOrders(t
 			wantValue:     "alipay-app-test",
 		},
 		{
+			name:          "alipay environment",
+			providerKey:   payment.TypeAlipay,
+			createConfig:  validAlipayProviderConfig,
+			supportedType: []string{payment.TypeAlipay},
+			updateConfig:  map[string]string{"environment": "sandbox"},
+			fieldName:     "environment",
+			wantValue:     "",
+		},
+		{
 			name:          "easypay pid",
 			providerKey:   payment.TypeEasyPay,
 			createConfig:  validEasyPayProviderConfig,
@@ -692,6 +701,23 @@ func TestUpdateProviderInstanceClearsAirwallexAccountID(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, cfg["accountId"])
 	require.Equal(t, "client-id-test", cfg["clientId"])
+}
+
+func TestAlipayEnvironmentCannotChangeAfterCompletedOrder(t *testing.T) {
+	ctx := context.Background()
+	client := newPaymentConfigServiceTestClient(t)
+	svc := &PaymentConfigService{entClient: client, encryptionKey: []byte("0123456789abcdef0123456789abcdef")}
+	instance, err := svc.CreateProviderInstance(ctx, CreateProviderInstanceRequest{
+		ProviderKey: payment.TypeAlipay, Name: "historical-environment", Config: validAlipayProviderConfig(t), SupportedTypes: []string{payment.TypeAlipay}, Enabled: true,
+	})
+	require.NoError(t, err)
+	createPendingProviderConfigOrder(t, ctx, client, instance)
+	_, err = client.PaymentOrder.Update().SetStatus(OrderStatusCompleted).Save(ctx)
+	require.NoError(t, err)
+	_, err = svc.UpdateProviderInstance(ctx, instance.ID, UpdateProviderInstanceRequest{Config: map[string]string{"environment": "production"}})
+	require.NoError(t, err, "making the existing production default explicit preserves historical routing")
+	_, err = svc.UpdateProviderInstance(ctx, instance.ID, UpdateProviderInstanceRequest{Config: map[string]string{"environment": "sandbox"}})
+	require.Equal(t, "PROVIDER_ENVIRONMENT_LOCKED", infraerrors.Reason(err))
 }
 
 func createPendingProviderConfigOrder(t *testing.T, ctx context.Context, client *dbent.Client, instance *dbent.PaymentProviderInstance) {

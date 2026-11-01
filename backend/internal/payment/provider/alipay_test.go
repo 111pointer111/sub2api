@@ -4,6 +4,10 @@ package provider
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"net/url"
 	"strings"
@@ -92,6 +96,12 @@ func TestNewAlipay(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:      "unknown environment is rejected",
+			config:    withOverride(map[string]string{"environment": "sandobx"}),
+			wantErr:   true,
+			errSubstr: "environment",
+		},
+		{
 			name:      "missing appId",
 			config:    withOverride(map[string]string{"appId": ""}),
 			wantErr:   true,
@@ -132,6 +142,42 @@ func TestNewAlipay(t *testing.T) {
 			}
 			if got.instanceID != "test-instance" {
 				t.Errorf("instanceID = %q, want %q", got.instanceID, "test-instance")
+			}
+		})
+	}
+}
+
+func TestAlipayEnvironmentGateway(t *testing.T) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	publicDER, err := x509.MarshalPKIXPublicKey(&key.PublicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	privatePEM := string(pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}))
+	publicPEM := string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: publicDER}))
+	for _, tc := range []struct{ name, environment, host string }{
+		{"existing config", "", "openapi.alipay.com"},
+		{"production", "production", "openapi.alipay.com"},
+		{"sandbox", "sandbox", "openapi-sandbox.dl.alipaydev.com"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p, err := NewAlipay("test", map[string]string{"appId": "test-app", "privateKey": privatePEM, "publicKey": publicPEM, "environment": tc.environment})
+			if err != nil {
+				t.Fatal(err)
+			}
+			client, err := p.getClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+			checkout, err := client.TradePagePay(alipay.TradePagePay{Trade: alipay.Trade{OutTradeNo: "sandbox-routing-test", TotalAmount: "1.00", Subject: "test", ProductCode: alipayProductCodePagePay}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if checkout.Host != tc.host {
+				t.Fatalf("checkout host = %q, want %q", checkout.Host, tc.host)
 			}
 		})
 	}

@@ -124,7 +124,7 @@ var providerSensitiveConfigFields = map[string]map[string]struct{}{
 // webhook/refund verification.
 var providerPendingOrderProtectedConfigFields = map[string]map[string]struct{}{
 	payment.TypeEasyPay:   {"pkey": {}, "pid": {}},
-	payment.TypeAlipay:    {"privatekey": {}, "publickey": {}, "alipaypublickey": {}, "appid": {}},
+	payment.TypeAlipay:    {"privatekey": {}, "publickey": {}, "alipaypublickey": {}, "appid": {}, "environment": {}},
 	payment.TypeWxpay:     {"privatekey": {}, "apiv3key": {}, "publickey": {}, "appid": {}, "mpappid": {}, "mchid": {}, "publickeyid": {}, "certserial": {}},
 	payment.TypeStripe:    {"secretkey": {}, "webhooksecret": {}, "currency": {}},
 	payment.TypeAirwallex: {"clientid": {}, "apikey": {}, "webhooksecret": {}, "apibase": {}, "accountid": {}, "currency": {}},
@@ -145,11 +145,26 @@ func hasPendingOrderProtectedConfigChange(providerKey string, currentConfig, nex
 		return false
 	}
 	for fieldName := range fields {
-		if providerConfigFieldValue(currentConfig, fieldName) != providerConfigFieldValue(nextConfig, fieldName) {
+		current := providerConfigFieldValue(currentConfig, fieldName)
+		next := providerConfigFieldValue(nextConfig, fieldName)
+		if providerKey == payment.TypeAlipay && fieldName == "environment" {
+			// Existing instances without this field already use production.
+			current = alipayEnvironmentValue(currentConfig)
+			next = alipayEnvironmentValue(nextConfig)
+		}
+		if current != next {
 			return true
 		}
 	}
 	return false
+}
+
+func alipayEnvironmentValue(config map[string]string) string {
+	value := strings.TrimSpace(providerConfigFieldValue(config, "environment"))
+	if value == "" {
+		return "production"
+	}
+	return value
 }
 
 func providerConfigFieldValue(config map[string]string, fieldName string) string {
@@ -334,6 +349,16 @@ func (s *PaymentConfigService) UpdateProviderInstance(ctx context.Context, id in
 			if count > 0 {
 				return nil, infraerrors.Conflict("PENDING_ORDERS", "instance has pending orders").
 					WithMetadata(map[string]string{"count": strconv.Itoa(count)})
+			}
+		}
+		if current.ProviderKey == payment.TypeAlipay && alipayEnvironmentValue(currentConfig) != alipayEnvironmentValue(mergedConfig) {
+			// Refunds and historical queries must keep using their original gateway.
+			hasOrders, err := s.entClient.PaymentOrder.Query().Where(paymentorder.ProviderInstanceIDEQ(strconv.FormatInt(id, 10))).Exist(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("check provider order history: %w", err)
+			}
+			if hasOrders {
+				return nil, infraerrors.Conflict("PROVIDER_ENVIRONMENT_LOCKED", "create a new Alipay instance to change environment after orders exist")
 			}
 		}
 	}

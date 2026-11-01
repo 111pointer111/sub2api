@@ -832,6 +832,8 @@ export default {
         field_returnUrl: 'Return URL',
         callbackBaseUrl: 'Callback Base URL',
         field_privateKey: 'Private Key',
+        field_environment: 'Alipay Environment',
+        field_alipayEnvironmentHint: 'Production collects real payments. Sandbox uses an Alipay sandbox app and test buyer. Sandbox orders also credit this site balance; use a separate test deployment.',
         field_publicKey: 'Public Key',
         field_mpAppId: 'MP App ID',
         field_mchId: 'Merchant ID',

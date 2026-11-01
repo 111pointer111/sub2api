@@ -26,6 +26,15 @@ describe('PROVIDER_CONFIG_FIELDS.wxpay', () => {
   })
 })
 
+describe('PROVIDER_CONFIG_FIELDS.alipay', () => {
+  it('defaults existing instances to production and exposes a separate sandbox environment', () => {
+    const environment = findField('alipay', 'environment')
+    expect(environment?.defaultValue).toBe('production')
+    expect(environment?.options?.map(option => option.value)).toEqual(['production', 'sandbox'])
+    expect(environment?.hintKey).toBe('admin.settings.payment.field_alipayEnvironmentHint')
+  })
+})
+
 describe('PROVIDER_CONFIG_FIELDS.airwallex', () => {
   it('adds currency config with CNY as the default', () => {
     const currency = findField('airwallex', 'currency')

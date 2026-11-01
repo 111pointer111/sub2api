@@ -60,6 +60,11 @@ type Alipay struct {
 
 // NewAlipay creates a new Alipay provider instance.
 func NewAlipay(instanceID string, config map[string]string) (*Alipay, error) {
+	switch strings.TrimSpace(config["environment"]) {
+	case "", "production", "sandbox":
+	default:
+		return nil, fmt.Errorf("alipay environment must be production or sandbox")
+	}
 	required := []string{"appId", "privateKey"}
 	for _, k := range required {
 		if config[k] == "" {
@@ -78,7 +83,8 @@ func (a *Alipay) getClient() (*alipay.Client, error) {
 	if a.client != nil {
 		return a.client, nil
 	}
-	client, err := alipay.New(a.config["appId"], a.config["privateKey"], true)
+	production := strings.TrimSpace(a.config["environment"]) != "sandbox"
+	client, err := alipay.New(a.config["appId"], a.config["privateKey"], production)
 	if err != nil {
 		return nil, fmt.Errorf("alipay init client: %w", err)
 	}

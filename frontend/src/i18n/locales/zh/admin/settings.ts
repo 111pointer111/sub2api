@@ -827,6 +827,8 @@ export default {
         field_returnUrl: '同步跳转地址',
         callbackBaseUrl: '回调基础地址',
         field_privateKey: '私钥',
+        field_environment: '支付宝环境',
+        field_alipayEnvironmentHint: 'Production 为真实收款；Sandbox 使用支付宝沙箱应用和测试买家。沙箱订单也会增加本站余额，请仅在独立测试站点使用。',
         field_publicKey: '公钥',
         field_mpAppId: '公众号 App ID',
         field_mchId: '商户号',
