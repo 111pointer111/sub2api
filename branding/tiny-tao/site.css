@@ -1,0 +1,67 @@
+#tiny-tao-home{--tt-paper:#f6f4ec;--tt-ink:#242624;--tt-muted:#62665e;--tt-accent:#df583a;background:var(--tt-paper);color:var(--tt-ink);font-family:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;overflow:hidden}
+#tiny-tao-home *{box-sizing:border-box}
+#tiny-tao-home a{color:inherit;text-decoration:none}
+#tiny-tao-home a:focus-visible{outline:3px solid var(--tt-accent);outline-offset:6px}
+#tiny-tao-home .tt-header{max-width:1440px;margin:auto;padding:28px 5.5%;display:flex;align-items:center;justify-content:space-between;gap:24px}
+#tiny-tao-home .tt-wordmark{display:inline-flex;align-items:center;gap:11px;font-size:22px;font-weight:700;letter-spacing:-.7px;white-space:nowrap}
+#tiny-tao-home .tt-api{font-weight:400}
+#tiny-tao-home nav{display:flex;align-items:center;gap:32px;font-size:13px;font-weight:600}
+#tiny-tao-home nav>a:not(.tt-nav-cta):hover{color:var(--tt-accent)}
+#tiny-tao-home .tt-nav-cta{border:1px solid #b7b9ae;border-radius:6px;padding:10px 17px}
+#tiny-tao-home .tt-nav-cta span{padding-left:17px}
+#tiny-tao-home .tt-hero{position:relative;min-height:650px;isolation:isolate;padding:64px 5.5% 76px}
+#tiny-tao-home .tt-hero-inner{max-width:1282px;margin:auto;position:relative;z-index:1}
+#tiny-tao-home .tt-eyebrow{font-family:ui-monospace,"SFMono-Regular",monospace;font-size:11px;letter-spacing:1.6px;margin:0 0 38px;text-transform:uppercase}
+#tiny-tao-home .tt-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--tt-accent);margin-right:12px;vertical-align:1px}
+#tiny-tao-home h1{font-weight:650;line-height:.98;font-size:clamp(80px,13.5vw,190px);letter-spacing:-.085em;margin:0 0 68px;animation:tt-enter .7s ease-out both}
+#tiny-tao-home .tt-title-api{font-weight:400;letter-spacing:-.08em}
+#tiny-tao-home .tt-period{color:var(--tt-accent)}
+#tiny-tao-home .tt-hero-bottom{display:flex;max-width:900px;justify-content:space-between;align-items:end;gap:55px;animation:tt-enter .8s .1s ease-out both}
+#tiny-tao-home .tt-hero-bottom h2{font-size:clamp(22px,2.5vw,34px);letter-spacing:-1px;font-weight:500;margin:0 0 18px}
+#tiny-tao-home .tt-intro{color:var(--tt-muted);font-size:16px;line-height:1.9;margin:0}
+#tiny-tao-home .tt-hero-actions{display:flex;flex-direction:column;gap:17px;min-width:190px}
+#tiny-tao-home .tt-button{display:inline-flex;align-items:center;justify-content:space-between;gap:35px;background:var(--tt-ink);color:var(--tt-paper);padding:17px 24px;border-radius:5px;font-size:14px;font-weight:600;transition:background .2s,transform .2s}
+#tiny-tao-home .tt-button:hover{background:var(--tt-accent);transform:translateY(-2px)}
+#tiny-tao-home .tt-text-link{font-size:12px;font-weight:600;display:inline-flex;justify-content:space-between;gap:20px}
+#tiny-tao-home .tt-text-link:hover{color:var(--tt-accent)}
+#tiny-tao-home .tt-route-art{position:absolute;right:-140px;bottom:-160px;width:500px;height:500px;z-index:0;opacity:.35;pointer-events:none}
+#tiny-tao-home .tt-art-orbit{position:absolute;inset:0;border:1px solid #b2b6a5;border-radius:50%;transform:rotate(-30deg) scaleX(.65)}
+#tiny-tao-home .tt-orbit-two{transform:rotate(30deg) scaleX(.65)}
+#tiny-tao-home .tt-art-core{position:absolute;left:135px;top:80px;font-size:180px;font-weight:600;letter-spacing:-20px}
+#tiny-tao-home .tt-art-core>span{color:var(--tt-accent)}
+#tiny-tao-home .tt-art-label{position:absolute;top:110px;left:330px;font-family:ui-monospace,monospace;font-size:10px;line-height:1.5;transform:rotate(90deg);white-space:nowrap}
+#tiny-tao-home .tt-principles{border-block:1px solid #d4d6ca;padding:49px 5.5%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6%;max-width:1440px;margin:auto}
+#tiny-tao-home .tt-index{font-family:ui-monospace,monospace;font-size:10px;color:var(--tt-muted);letter-spacing:1.5px}
+#tiny-tao-home .tt-principles h2{font-size:21px;font-weight:500;margin:20px 0 14px;letter-spacing:-.6px}
+#tiny-tao-home .tt-principles p{max-width:300px;font-size:13px;line-height:1.9;color:var(--tt-muted);margin:0}
+#tiny-tao-home .tt-start{max-width:1440px;padding:100px 5.5%;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:11%;scroll-margin-top:30px}
+#tiny-tao-home .tt-start-heading .tt-eyebrow{color:var(--tt-accent);margin-bottom:25px}
+#tiny-tao-home .tt-start h2{font-size:clamp(28px,3.3vw,46px);line-height:1.4;font-weight:500;letter-spacing:-1.8px;margin:0 0 24px}
+#tiny-tao-home .tt-start-heading>p:last-child{font-size:13px;color:var(--tt-muted);line-height:1.9}
+#tiny-tao-home .tt-code-label{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:1.8px;color:var(--tt-muted);margin:0 0 12px}
+#tiny-tao-home .tt-endpoint{font-family:ui-monospace,monospace;font-size:clamp(12px,1.7vw,20px);display:block;border-bottom:1px solid #bfc3b6;padding-bottom:22px;overflow-wrap:anywhere;user-select:all}
+#tiny-tao-home .tt-connection ol{list-style:none;padding:0;margin:29px 0;display:flex;flex-direction:column;gap:25px}
+#tiny-tao-home .tt-connection li{display:flex;align-items:start;gap:19px;font-size:13px}
+#tiny-tao-home .tt-connection li>span{font-family:ui-monospace,monospace;color:var(--tt-accent);padding-top:1px}
+#tiny-tao-home .tt-connection strong,#tiny-tao-home .tt-connection li a{font-weight:600}
+#tiny-tao-home .tt-connection li a:hover{color:var(--tt-accent)}
+#tiny-tao-home .tt-connection li p{font-size:12px;color:var(--tt-muted);line-height:1.8;margin:5px 0 0}
+#tiny-tao-home .tt-closing{background:#e9ebdf;padding:60px 5.5%;display:flex;align-items:center;justify-content:space-between;gap:30px}
+#tiny-tao-home .tt-closing p{font-size:clamp(24px,3vw,38px);line-height:1.4;font-weight:500;letter-spacing:-1px;margin:0}
+#tiny-tao-home .tt-footer{max-width:1440px;padding:34px 5.5%;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:25px}
+#tiny-tao-home .tt-footer .tt-wordmark{font-size:16px;letter-spacing:-.5px}
+#tiny-tao-home .tt-footer p{font-size:11px;color:var(--tt-muted);line-height:1.8;margin:0;text-align:right}
+#tiny-tao-home .tt-footer p a{text-decoration:underline;text-underline-offset:3px}
+#tiny-tao-home .tt-skip{position:absolute;top:-100px;left:20px;z-index:10;background:var(--tt-ink);color:white;padding:12px}
+#tiny-tao-home .tt-skip:focus{top:12px}
+@keyframes tt-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){#tiny-tao-home *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:700px){
+ #tiny-tao-home .tt-header{padding:22px 6%}#tiny-tao-home .tt-wordmark{font-size:19px}#tiny-tao-home .tt-header nav{gap:14px}#tiny-tao-home nav>a:not(.tt-nav-cta){display:none}
+ #tiny-tao-home .tt-nav-cta{padding:8px 12px}#tiny-tao-home .tt-hero{min-height:auto;padding:54px 6% 70px}#tiny-tao-home .tt-eyebrow{font-size:9px;letter-spacing:.6px;margin-bottom:37px}
+ #tiny-tao-home h1{font-size:clamp(58px,15.3vw,110px);letter-spacing:-.08em;margin-bottom:48px;white-space:nowrap}#tiny-tao-home .tt-hero-bottom{display:block}#tiny-tao-home .tt-hero-bottom h2{font-size:23px}
+ #tiny-tao-home .tt-intro{font-size:14px}#tiny-tao-home .tt-hero-actions{margin-top:30px;max-width:230px;gap:18px}#tiny-tao-home .tt-route-art{right:-290px;bottom:-190px;opacity:.22}
+ #tiny-tao-home .tt-principles{grid-template-columns:1fr;padding:38px 6%;gap:32px}#tiny-tao-home .tt-principles>div{padding-bottom:26px;border-bottom:1px solid #d4d6ca}#tiny-tao-home .tt-principles>div:last-child{padding-bottom:0;border:0}
+ #tiny-tao-home .tt-principles h2{margin:10px 0;font-size:20px}#tiny-tao-home .tt-principles p{max-width:none}#tiny-tao-home .tt-start{grid-template-columns:1fr;padding:58px 6%;gap:28px}#tiny-tao-home .tt-start h2{font-size:32px}
+ #tiny-tao-home .tt-endpoint{font-size:15px}#tiny-tao-home .tt-closing{padding:42px 6%;display:block}#tiny-tao-home .tt-closing .tt-button{margin-top:25px}#tiny-tao-home .tt-footer{padding:30px 6%;flex-direction:column;align-items:start;gap:18px}#tiny-tao-home .tt-footer p{text-align:left;font-size:11px}
+}
