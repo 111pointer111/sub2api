@@ -1,0 +1,14 @@
+{
+  "event": "auth.verify_code",
+  "from_name": "tiny-tao api",
+  "templates": {
+    "zh": {
+      "subject": "{{site_name}} 邮箱验证码",
+      "html_file": "auth.verify_code.zh.html"
+    },
+    "en": {
+      "subject": "{{site_name}} email verification code",
+      "html_file": "auth.verify_code.en.html"
+    }
+  }
+}
