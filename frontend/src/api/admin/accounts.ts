@@ -12,6 +12,7 @@ import type {
   UpdateAccountRequest,
   PaginatedResponse,
   AccountUsageInfo,
+  OpenAIPlatformUsage,
   WindowStats,
   ClaudeModel,
   AccountUsageStatsResponse,
@@ -1134,6 +1135,14 @@ export async function refreshOpenCodeGoUsage(id: number): Promise<OpenCodeGoUsag
   return data
 }
 
+export async function getOpenAIPlatformUsage(id: number, force = false): Promise<OpenAIPlatformUsage> {
+  const { data } = await apiClient.get<OpenAIPlatformUsage>(`/admin/accounts/${id}/openai-platform-usage`, {
+    params: { force },
+    timeout: 35000
+  })
+  return data
+}
+
 export const accountsAPI = {
   list,
   listWithEtag,
@@ -1153,6 +1162,7 @@ export const accountsAPI = {
   getStats,
   clearError,
   getUsage,
+  getOpenAIPlatformUsage,
   getBatchUsage,
   getTodayStats,
   getBatchTodayStats,

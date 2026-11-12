@@ -203,6 +203,7 @@ Sub2API 是一个 AI API 网关平台，用于分发和管理 AI 产品订阅的
 - **速率限制** - 可配置的请求和 Token 速率限制
 - **内置支付系统** - 支持 EasyPay 易支付、支付宝官方、微信官方、Stripe，用户自助充值，无需独立部署支付服务（[配置指南](docs/PAYMENT_CN.md)）
 - **管理后台** - Web 界面进行监控和管理
+- **OpenAI 官方账单** - 在账号管理中编辑官方 OpenAI API Key 账号，启用“显示 OpenAI 官方账单”并填写组织的 Admin API Key，即可在用量列查看今日、本月费用和本月生成请求及 Token。项目 ID 可选，留空统计整个组织。日期按 UTC 计算，页面停留期间每五分钟刷新，也可手动刷新。费用包含官方各类计费项目，生成用量来自 completions 统计接口，官方数据可能延迟。查询权限及接口见 [OpenAI 官方文档](https://developers.openai.com/api/reference/resources/admin/subresources/organization/subresources/usage)。
 - **外部系统集成** - 支持通过 iframe 嵌入外部系统（如工单等），扩展管理后台功能
 
 ## 生态项目

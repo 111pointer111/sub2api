@@ -200,6 +200,7 @@ Sub2API is an AI API gateway platform designed to distribute and manage API quot
 - **Rate Limiting** - Configurable request and token rate limits
 - **Built-in Payment System** - Supports EasyPay, Alipay, WeChat Pay, and Stripe for user self-service top-up, no separate payment service needed ([Configuration Guide](docs/PAYMENT.md))
 - **Admin Dashboard** - Web interface for monitoring and management
+- **Official OpenAI Billing** - Edit an official OpenAI API-key account, enable official billing, and enter an organization Admin API key to view daily/monthly costs and monthly generation requests and tokens in the usage column. An optional project ID filters both queries. The default scope is the entire organization. Dates use UTC. The open page refreshes every five minutes and supports manual refresh. Costs cover all billed products, while generation usage comes from the completions usage endpoint. Official data may be delayed. See the [OpenAI API documentation](https://developers.openai.com/api/reference/resources/admin/subresources/organization/subresources/usage) for endpoint permissions.
 - **Composite Groups** - Admin routing layer that resolves requested models to concrete providers for multi-provider groups ([Operator Guide](docs/COMPOSITE_GROUPS.md))
 - **External System Integration** - Embed external systems (e.g. ticketing) via iframe to extend the admin dashboard
 

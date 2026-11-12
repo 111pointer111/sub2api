@@ -330,6 +330,35 @@ function mountModal(account = buildAccount(), renderGroupSelector = false) {
 }
 
 describe('EditAccountModal', () => {
+  it('saves the official OpenAI Admin key and project filter through the normal account form', async () => {
+    const account = buildAccount()
+    updateAccountMock.mockReset().mockResolvedValue(account)
+    checkMixedChannelRiskMock.mockReset().mockResolvedValue({ has_risk: false })
+    const wrapper = mountModal(account)
+    await wrapper.get('[data-testid="openai-platform-usage-enabled"]').setValue(true)
+    await wrapper.get('#openai-admin-api-key').setValue(' sk-admin-test ')
+    await wrapper.get('#openai-usage-project').setValue(' proj_test ')
+    await wrapper.get('form#edit-account-form').trigger('submit.prevent')
+    expect(updateAccountMock.mock.calls[0]?.[1]?.credentials?.openai_admin_api_key).toBe('sk-admin-test')
+    expect(updateAccountMock.mock.calls[0]?.[1]?.credentials?.openai_usage_project_id).toBe('proj_test')
+    wrapper.unmount()
+  })
+
+  it('preserves a redacted Admin key on ordinary edits and clears it when billing is disabled', async () => {
+    const account = buildAccount()
+    account.credentials_status = { has_api_key: true, has_openai_admin_api_key: true }
+    updateAccountMock.mockReset().mockResolvedValue(account)
+    checkMixedChannelRiskMock.mockReset().mockResolvedValue({ has_risk: false })
+    const wrapper = mountModal(account)
+    expect(wrapper.get<HTMLInputElement>('#openai-admin-api-key').element.value).toBe('')
+    await wrapper.get('form#edit-account-form').trigger('submit.prevent')
+    expect(updateAccountMock.mock.calls[0]?.[1]?.credentials).not.toHaveProperty('openai_admin_api_key')
+    await wrapper.get('[data-testid="openai-platform-usage-enabled"]').setValue(false)
+    await wrapper.get('form#edit-account-form').trigger('submit.prevent')
+    expect(updateAccountMock.mock.calls[1]?.[1]?.credentials?.openai_admin_api_key).toBe('')
+    wrapper.unmount()
+  })
+
   beforeEach(() => {
     authIsSimpleMode.value = true
   })

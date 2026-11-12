@@ -250,6 +250,45 @@
           <p class="input-hint">{{ t('admin.accounts.leaveEmptyToKeep') }}</p>
         </div>
 
+        <section
+          v-if="account.platform === 'openai' && isOfficialOpenAIPlatformUrl(editBaseUrl)"
+          class="space-y-3 border-t border-gray-200 pt-4 dark:border-dark-600"
+          aria-labelledby="openai-platform-usage-title"
+        >
+          <label id="openai-platform-usage-title" class="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+            <input v-model="openAIPlatformUsageEnabled" type="checkbox" class="rounded" data-testid="openai-platform-usage-enabled" />
+            {{ t('admin.accounts.openaiPlatformUsage.enable') }}
+          </label>
+          <p class="text-xs leading-5 text-gray-600 dark:text-gray-300">{{ t('admin.accounts.openaiPlatformUsage.hint') }}</p>
+          <template v-if="openAIPlatformUsageEnabled">
+            <div>
+              <label for="openai-admin-api-key" class="input-label">Admin API Key</label>
+              <input
+                id="openai-admin-api-key"
+                v-model="openAIAdminAPIKey"
+                type="password"
+                class="input font-mono"
+                autocomplete="new-password"
+                data-1p-ignore
+                data-lpignore="true"
+                data-bwignore="true"
+                :placeholder="account.credentials_status?.has_openai_admin_api_key ? t('admin.accounts.leaveEmptyToKeep') : 'sk-admin-...'"
+              />
+              <a
+                href="https://platform.openai.com/settings/organization/admin-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mt-1 inline-block text-xs text-primary-700 hover:underline dark:text-primary-300"
+              >{{ t('admin.accounts.openaiPlatformUsage.createKey') }}</a>
+            </div>
+            <div>
+              <label for="openai-usage-project" class="input-label">{{ t('admin.accounts.openaiPlatformUsage.projectId') }}</label>
+              <input id="openai-usage-project" v-model="openAIUsageProjectID" type="text" class="input font-mono" placeholder="proj_..." />
+              <p class="input-hint">{{ t('admin.accounts.openaiPlatformUsage.projectHint') }}</p>
+            </div>
+          </template>
+        </section>
+
         <!-- Model Restriction Section (不适用于 Antigravity) -->
         <div
           v-if="account.platform !== 'antigravity'"
@@ -3382,6 +3421,7 @@
 import { ref, reactive, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
+import { isOfficialOpenAIPlatformUrl } from '@/utils/openaiPlatformUsage'
 
 import { adminAPI } from '@/api/admin'
 import { useQuotaNotifyState } from '@/composables/useQuotaNotifyState'
@@ -3645,6 +3685,9 @@ interface TempUnschedRuleForm {
 const submitting = ref(false)
 const editBaseUrl = ref('https://api.anthropic.com')
 const editApiKey = ref('')
+const openAIPlatformUsageEnabled = ref(false)
+const openAIAdminAPIKey = ref('')
+const openAIUsageProjectID = ref('')
 
 // ── 国产供应商（Kimi / Zhipu / DeepSeek）account_mode / api_protocol 编辑 ──
 // account_mode 决定额度/余额监控路径，api_protocol 决定转发端点与格式；
@@ -4609,6 +4652,9 @@ const syncFormFromAccount = (newAccount: Account | null) => {
 
   // Load intercept warmup requests setting (applies to all account types)
   const credentials = newAccount.credentials as Record<string, unknown> | undefined
+  openAIPlatformUsageEnabled.value = newAccount.credentials_status?.has_openai_admin_api_key === true
+  openAIAdminAPIKey.value = ''
+  openAIUsageProjectID.value = typeof credentials?.openai_usage_project_id === 'string' ? credentials.openai_usage_project_id : ''
   interceptWarmupRequests.value = credentials?.intercept_warmup_requests === true
   autoPauseOnExpired.value = newAccount.auto_pause_on_expired === true
   editVertexProjectId.value = ''
@@ -5734,6 +5780,20 @@ const handleSubmit = async () => {
         newCredentials.model_mapping = currentCredentials.model_mapping
       }
       if (props.account.platform === 'openai') {
+        if (openAIPlatformUsageEnabled.value && isOfficialOpenAIPlatformUrl(editBaseUrl.value)) {
+          const adminKey = openAIAdminAPIKey.value.trim()
+          if (!adminKey && !props.account.credentials_status?.has_openai_admin_api_key) {
+            appStore.showError(t('admin.accounts.openaiPlatformUsage.keyRequired'))
+            return
+          }
+          if (adminKey) newCredentials.openai_admin_api_key = adminKey
+          const projectID = openAIUsageProjectID.value.trim()
+          if (projectID) newCredentials.openai_usage_project_id = projectID
+          else delete newCredentials.openai_usage_project_id
+        } else {
+          newCredentials.openai_admin_api_key = ''
+          delete newCredentials.openai_usage_project_id
+        }
         applyOpenAIEndpointCapabilities(newCredentials)
         const compactModelMapping = buildModelMappingObject('mapping', [], openAICompactModelMappings.value)
         if (compactModelMapping) {
