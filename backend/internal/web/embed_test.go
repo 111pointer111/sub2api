@@ -699,6 +699,7 @@ func TestEmbeddedFrontendBypassesBareAPIAliases(t *testing.T) {
 	for _, path := range []string{
 		"/chat/completions",
 		"/embeddings",
+		"/audio/speech",
 		"/messages/count_tokens",
 		"/models/gpt-5.5",
 		"/videos",
@@ -726,6 +727,31 @@ func TestEmbeddedFrontendBypassesBareAPIAliases(t *testing.T) {
 		"/v3/other",
 	} {
 		require.False(t, shouldBypassEmbeddedFrontend(path), "path=%s", path)
+	}
+}
+
+func TestEmbeddedFrontendBypassesSpeechPOSTRoutes(t *testing.T) {
+	server, err := NewFrontendServer(&mockSettingsProvider{settings: map[string]string{}})
+	require.NoError(t, err)
+	for name, frontend := range map[string]gin.HandlerFunc{
+		"settings-aware": server.Middleware(),
+		"embedded":       ServeEmbeddedFrontend(),
+	} {
+		for _, path := range []string{"/audio/speech", "/v1/audio/speech"} {
+			t.Run(name+path, func(t *testing.T) {
+				router := gin.New()
+				router.Use(frontend)
+				router.POST(path, func(c *gin.Context) {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "API key is required"})
+				})
+				recorder := httptest.NewRecorder()
+				request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{}`))
+				request.Header.Set("Content-Type", "application/json")
+				router.ServeHTTP(recorder, request)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+				require.Contains(t, recorder.Header().Get("Content-Type"), "application/json")
+			})
+		}
 	}
 }
 
