@@ -621,6 +621,11 @@
     <AccountQuotaInfo v-if="account.platform === 'gemini' && !isGeminiThirdPartyApiKey" :account="account" />
     <!-- Key/Bedrock accounts: show today stats + optional quota bars -->
     <div v-else class="space-y-1">
+      <OpenAIPlatformUsageCell
+        v-if="hasOpenAIPlatformUsage(account)"
+        :account="account"
+        :manual-refresh-token="manualRefreshToken"
+      />
       <OllamaCloudUsageCell
         v-if="account.ollama_cloud_usage?.eligible"
         :account="account"
@@ -691,7 +696,7 @@
 
       <!-- No data at all -->
       <div
-        v-if="!todayStats && !todayStatsLoading && !hasApiKeyQuota && !account.ollama_cloud_usage?.eligible && !account.opencode_go_usage?.eligible"
+        v-if="!todayStats && !todayStatsLoading && !hasApiKeyQuota && !hasOpenAIPlatformUsage(account) && !account.ollama_cloud_usage?.eligible && !account.opencode_go_usage?.eligible"
         class="text-xs text-gray-400"
       >-</div>
     </div>
@@ -722,6 +727,8 @@ import {
   isMultiProtocolApiKeyPlatform
 } from './credentialsBuilder'
 import OpenCodeGoUsageCell from './OpenCodeGoUsageCell.vue'
+import OpenAIPlatformUsageCell from './OpenAIPlatformUsageCell.vue'
+import { hasOpenAIPlatformUsage } from '@/utils/openaiPlatformUsage'
 
 // Module-level cache shared across all AccountUsageCell instances
 const _usageCache = new Map<number, { data: AccountUsageInfo; ts: number }>()

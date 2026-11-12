@@ -1488,6 +1488,20 @@ export interface GrokBillingSummary {
   failed_windows?: string[]
 }
 
+export interface OpenAIPlatformUsage {
+  project_id?: string
+  period_start: string
+  period_end: string
+  fetched_at: string
+  monthly_cost: string
+  today_cost: string
+  currency: 'USD'
+  input_tokens: number
+  output_tokens: number
+  cached_input_tokens: number
+  requests: number
+}
+
 export interface AccountUsageInfo {
   source?: 'passive' | 'active'
   updated_at: string | null
