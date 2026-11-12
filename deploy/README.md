@@ -659,7 +659,7 @@ gateway:
 
 ## 韩国生产的统一发布来源
 
-生产发布使用本 fork 的 `codex/tiny-tao-alipay-sandbox`。本地工作目录与 GitHub 分支同步后，从同一提交构建嵌入前端的 Linux amd64 二进制。服务器源码检出在 `/opt/sub2api/source`，运行镜像的 `org.opencontainers.image.revision` 标签和程序版本信息记录该提交号。
+生产发布使用本 fork 的 `main`。本地工作目录与 GitHub 分支同步后，从同一提交构建嵌入前端的 Linux amd64 二进制。服务器源码检出在 `/opt/sub2api/source`，运行镜像的 `org.opencontainers.image.revision` 标签和程序版本信息记录该提交号。
 
 - 当前部署回执为 `/opt/sub2api/current-release.json`，包含提交号、镜像、二进制 SHA-256、前端资源校验和与备份位置。
 - 每次构建包与部署回执保存在 `/opt/sub2api/patches/` 下对应版本目录，数据库、应用数据和 Compose 配置备份保存在 `/var/backups/sub2api/`。
@@ -669,7 +669,7 @@ gateway:
 
 ```bash
 git rev-parse HEAD
-git ls-remote origin refs/heads/codex/tiny-tao-alipay-sandbox
+git ls-remote origin refs/heads/main
 ssh tao-api git -C /opt/sub2api/source rev-parse HEAD
 ssh tao-api docker exec sub2api /app/sub2api -version
 ```
