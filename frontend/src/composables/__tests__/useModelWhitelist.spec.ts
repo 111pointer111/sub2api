@@ -8,6 +8,10 @@ import { buildModelMappingObject, getModelsByPlatform, getPresetMappingsByPlatfo
 import { BUILTIN_PLATFORM_CATALOG, resetPlatformCatalog, setPlatformCatalog } from '@/constants/platformCatalog'
 
 describe('useModelWhitelist', () => {
+  it('Rime 预填语音模型，映射预设保持为空', () => {
+    expect(getModelsByPlatform('rime')).toEqual(['coda', 'mistv3'])
+    expect(getPresetMappingsByPlatform('rime')).toEqual([])
+  })
   it('平台清单中没有内置模型列表的多协议供应商不预填白名单', () => {
     setPlatformCatalog({
       ...BUILTIN_PLATFORM_CATALOG,

@@ -124,6 +124,8 @@ func DetectModelPlatform(model string) (string, bool) {
 	}
 
 	switch {
+	case normalized == "coda", normalized == "mistv3":
+		return PlatformRime, true
 	case strings.HasPrefix(normalized, "anthropic.claude-"),
 		strings.HasPrefix(normalized, "claude-"):
 		return PlatformAnthropic, true

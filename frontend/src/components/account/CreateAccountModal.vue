@@ -246,13 +246,13 @@
             <PlatformIcon platform="opencode_go" size="sm" />
             OpenCode
           </button>
-          <!-- 没有专属界面的多协议供应商：通用表单（模式 / 协议 / 端点来自 profile） -->
+          <!-- 使用通用 API Key 表单的供应商 -->
           <button
-            v-for="spec in extraMultiProtocolPlatforms"
+            v-for="spec in extraAPIKeyPlatforms"
             :key="spec.id"
             type="button"
             :data-testid="`platform-button-${spec.id}`"
-            @click="selectGenericMultiProtocolPlatform(spec.id)"
+            @click="selectExtraAPIKeyPlatform(spec.id)"
             :class="[
               'flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium transition-all',
               form.platform === spec.id
@@ -4256,6 +4256,7 @@ const withUpstreamRequestIdHeader = <T extends Record<string, unknown> | undefin
 const baseUrlHint = computed(() => {
   if (form.platform === 'openai') return t('admin.accounts.openai.baseUrlHint')
   if (form.platform === 'gemini') return t('admin.accounts.gemini.baseUrlHint')
+  if (form.platform === 'rime') return t('admin.accounts.rimeBaseUrlHint')
   if (form.platform === 'grok') return ''
   return t('admin.accounts.baseUrlHint')
 })
@@ -4264,7 +4265,7 @@ const apiKeyHint = computed(() => {
   if (form.platform === 'openai') return t('admin.accounts.openai.apiKeyHint')
   if (form.platform === 'gemini') return t('admin.accounts.gemini.apiKeyHint')
   // Grok 与多协议供应商没有对应的说明文案；通用文案指 Claude Console Key。
-  if (form.platform === 'grok' || isMultiProtocolPlatform.value) return ''
+  if (form.platform === 'grok' || form.platform === 'rime' || isMultiProtocolPlatform.value) return ''
   return t('admin.accounts.apiKeyHint')
 })
 
@@ -4281,6 +4282,8 @@ const apiKeyBaseUrlPlaceholder = computed(() => {
       return 'https://generativelanguage.googleapis.com'
     case 'grok':
       return 'https://api.x.ai/v1'
+    case 'rime':
+      return 'https://coda.api.rime.ai'
     case 'typesafe':
       return 'https://api.typesafe.ai'
     default:
@@ -4296,6 +4299,8 @@ const apiKeyValuePlaceholder = computed(() => {
       return 'AQ.Ab...'
     case 'grok':
       return 'xai-...'
+    case 'rime':
+      return 'Rime API Key'
     case 'kimi':
       return 'sk-...'
     case 'zhipu':
@@ -4423,8 +4428,10 @@ const isMultiProtocolPlatform = computed(() => isMultiProtocolApiKeyPlatform(for
 const isGenericMultiProtocolPlatform = computed(
   () => isMultiProtocolPlatform.value && !isCNPlatform.value && !isOpenCodeGoPlatform.value
 )
-const extraMultiProtocolPlatforms = computed(() =>
-  listPlatforms().filter(spec => !!spec.multi_protocol && !isCNProviderPlatform(spec.id) && spec.id !== 'opencode_go')
+const extraAPIKeyPlatforms = computed(() =>
+  listPlatforms().filter(spec =>
+    spec.id === 'rime' || (!!spec.multi_protocol && !isCNProviderPlatform(spec.id) && spec.id !== 'opencode_go')
+  )
 )
 const genericAccountModes = computed(() => providerAccountModes(form.platform))
 // 按模型分流的供应商（OpenCode 等）：adaptive 账号携带 protocol_rules。
@@ -4529,10 +4536,15 @@ function selectTypeSafePlatform() {
   apiKeyBaseUrl.value = 'https://api.typesafe.ai'
   allowedModels.value = ['jev-latest']
 }
-function selectGenericMultiProtocolPlatform(platform: string) {
+function selectExtraAPIKeyPlatform(platform: string) {
   form.platform = platform
   form.type = 'apikey'
   accountCategory.value = 'apikey'
+  if (platform === 'rime') {
+    apiKeyBaseUrl.value = 'https://coda.api.rime.ai'
+    allowedModels.value = ['coda', 'mistv3']
+    return
+  }
   apiProtocol.value = 'adaptive'
   accountMode.value = resolveProviderAccountMode(platform, undefined)
   apiKeyBaseUrl.value = defaultCNBaseUrl(platform, accountMode.value, apiProtocol.value)
@@ -5147,6 +5159,8 @@ watch(
             ? 'https://generativelanguage.googleapis.com'
             : newPlatform === 'grok'
               ? 'https://api.x.ai/v1'
+              : newPlatform === 'rime'
+                ? 'https://coda.api.rime.ai'
               : newPlatform === 'typesafe'
                 ? 'https://api.typesafe.ai'
               : 'https://api.anthropic.com'
@@ -5155,6 +5169,11 @@ watch(
     allowedModels.value = []
     upstreamModelsPreviewed.value = false
     modelMappings.value = []
+    if (newPlatform === 'rime') {
+      accountCategory.value = 'apikey'
+      modelRestrictionMode.value = 'whitelist'
+      allowedModels.value = ['coda', 'mistv3']
+    }
     if (newPlatform === 'typesafe') {
       accountCategory.value = 'apikey'
       // Grok 等平台会把模式切到映射；TypeSafe 只用白名单写入 jev-latest。
@@ -6114,6 +6133,8 @@ const handleSubmit = async () => {
         ? 'https://generativelanguage.googleapis.com'
         : form.platform === 'grok'
           ? 'https://api.x.ai/v1'
+          : form.platform === 'rime'
+            ? 'https://coda.api.rime.ai'
           : form.platform === 'typesafe'
             ? 'https://api.typesafe.ai'
           : 'https://api.anthropic.com'

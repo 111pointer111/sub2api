@@ -76,6 +76,8 @@ func TestNormalizeInboundEndpoint(t *testing.T) {
 
 		// Unknown path is returned as-is.
 		{"/v1/embeddings", "/v1/embeddings"},
+		{"/v1/audio/speech", EndpointSpeech},
+		{"/audio/speech", EndpointSpeech},
 		{"", ""},
 		{"  /v1/messages  ", EndpointMessages},
 	}

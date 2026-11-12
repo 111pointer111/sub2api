@@ -2819,6 +2819,14 @@ func (h *AccountHandler) GetAvailableModels(c *gin.Context) {
 }
 
 func (h *AccountHandler) respondAvailableModels(c *gin.Context, account *service.Account) {
+	if account.Platform == service.PlatformRime {
+		models := make([]openai.Model, 0, len(service.RimeSpeechModelIDs))
+		for _, id := range service.RimeSpeechModelIDs {
+			models = append(models, openai.Model{ID: id, Object: "model", OwnedBy: service.PlatformRime})
+		}
+		response.Success(c, models)
+		return
+	}
 	// Handle OpenAI accounts
 	if account.IsOpenAI() {
 		// Prefer the shared, account-keyed upstream catalog. If discovery fails,

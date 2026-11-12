@@ -648,6 +648,7 @@ export default {
       addMethod: 'Add Method',
       setupTokenLongLived: 'Setup Token (Long-lived)',
       baseUrl: 'Base URL',
+      rimeBaseUrlHint: 'The default selects the Coda or Mist v3 host by model. For custom services, enter the full synthesis endpoint URL.',
       baseUrlHint: 'Leave default for official Anthropic API',
       apiKeyRequired: 'API Key *',
       apiKeyPlaceholder: 'sk-ant-api03-...',

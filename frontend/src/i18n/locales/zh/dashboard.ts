@@ -190,6 +190,10 @@ export default {
         description: '通过 TypeSafe 原生 System One 端点调用 Jev。',
         note: 'System One 不支持流式请求，也不兼容 Chat Completions、Responses、Claude Code 或 Codex 客户端。'
       },
+      rime: {
+        description: '通过统一文字转语音接口调用 Rime Coda 或 Mist v3，生成并保存音频。',
+        note: 'model 选择 coda 或 mistv3，voice 填 Rime 音色名称。每次最多输入 1000 个字符，费用按分组的 TTS 单价计算。'
+      },
       antigravity: {
         description: '为 Antigravity 分组配置 API 访问。请根据您使用的客户端选择对应的配置方式。',
         claudeCode: 'Claude Code',

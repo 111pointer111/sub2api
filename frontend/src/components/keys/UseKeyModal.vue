@@ -368,6 +368,8 @@ const defaultClientTab = computed(() => {
       return 'claude'
     case 'typesafe':
       return 'systemone'
+    case 'rime':
+      return 'speech'
     default:
       return 'claude'
   }
@@ -502,6 +504,8 @@ const clientTabs = computed((): TabConfig[] => {
       return [
         { id: 'systemone', label: t('keys.useKeyModal.cliTabs.systemOne'), icon: TerminalIcon }
       ]
+    case 'rime':
+      return [{ id: 'speech', label: 'TTS API', icon: TerminalIcon }]
     case 'deepseek':
     case 'minimax':
     case 'composite':
@@ -588,6 +592,8 @@ const platformDescription = computed(() => {
         : t('keys.useKeyModal.composite.description')
     case 'typesafe':
       return t('keys.useKeyModal.typesafe.description')
+    case 'rime':
+      return t('keys.useKeyModal.rime.description')
     default:
       return t('keys.useKeyModal.description')
   }
@@ -647,6 +653,8 @@ const platformNote = computed(() => {
         : t('keys.useKeyModal.note')
     case 'typesafe':
       return t('keys.useKeyModal.typesafe.note')
+    case 'rime':
+      return t('keys.useKeyModal.rime.note')
     default:
       return t('keys.useKeyModal.note')
   }
@@ -777,6 +785,20 @@ const currentFiles = computed((): FileConfig[] => {
   switch (props.platform) {
     case 'typesafe':
       return [generateSystemOneCurl(baseRoot, apiKey)]
+    case 'rime': {
+      const payload = JSON.stringify({ model: 'coda', input: 'Hello from Sub2API.', voice: 'astra', response_format: 'mp3' })
+      if (activeTab.value === 'powershell') {
+        return [{
+          path: 'PowerShell',
+          content: `Invoke-WebRequest -Method Post -Uri "${apiBase}/audio/speech" -Headers @{ Authorization = "Bearer ${apiKey}" } -ContentType "application/json" -Body '${payload}' -OutFile speech.mp3`
+        }]
+      }
+      const data = activeTab.value === 'unix' ? `'${payload}'` : `"${payload.replace(/"/g, '\\"')}"`
+      return [{
+        path: 'curl',
+        content: `curl "${apiBase}/audio/speech" -H "Authorization: Bearer ${apiKey}" -H "Content-Type: application/json" --fail --output speech.mp3 --data ${data}`
+      }]
+    }
     case 'openai':
       if (activeClientTab.value === 'claude') {
         // Anthropic clients append /v1/messages themselves.
@@ -1337,6 +1359,7 @@ function generateRoutedCodexFiles(
     typesafe: 'TypeSafe / Jev',
     command_code: 'Command Code',
     cline: 'Cline',
+    rime: 'Rime',
     composite: 'Composite'
   }
   const label = labels[platform]
