@@ -657,13 +657,30 @@ gateway:
 
 **Curves:** `29` (X25519), `23` (P-256), `24` (P-384), `25` (P-521)
 
-## 韩国 tiny-tao api 的 OpenAI 账单查询
+## 韩国生产的统一发布来源
 
-2026-11-12 已部署到韩国 `tao-api` 的现有 Sub2API，入口为 [账号管理](https://api.stao-ai.com/admin/accounts)。编辑官方 OpenAI API Key 账号，启用“显示 OpenAI 官方账单”并填写组织的 Admin API Key 后，原用量列会显示今日、本月费用和本月生成用量。项目 ID 留空时统计整个组织，日期按 UTC 计算，页面停留期间每五分钟刷新。
+生产发布使用本 fork 的 `codex/tiny-tao-alipay-sandbox`。本地工作目录与 GitHub 分支同步后，从同一提交构建嵌入前端的 Linux amd64 二进制。服务器源码检出在 `/opt/sub2api/source`，运行镜像的 `org.opencontainers.image.revision` 标签和程序版本信息记录该提交号。
+
+- 当前部署回执为 `/opt/sub2api/current-release.json`，包含提交号、镜像、二进制 SHA-256、前端资源校验和与备份位置。
+- 每次构建包与部署回执保存在 `/opt/sub2api/patches/` 下对应版本目录，数据库、应用数据和 Compose 配置备份保存在 `/var/backups/sub2api/`。
+- 更新服务使用现有 `compose.yml` 与 `compose.override.yml`，替换应用镜像后检查内网、公网健康与前端资源。回退入口保存在同一部署回执中。
+
+核对代码来源时，在本地仓库检查当前提交和 GitHub 分支，再检查服务器源码与运行程序。
+
+```bash
+git rev-parse HEAD
+git ls-remote origin refs/heads/codex/tiny-tao-alipay-sandbox
+ssh tao-api git -C /opt/sub2api/source rev-parse HEAD
+ssh tao-api docker exec sub2api /app/sub2api -version
+```
+
+## 2026-11-12 OpenAI 账单查询上线记录
+
+2026-11-12 首次部署到韩国 `tao-api` 的现有 Sub2API，入口为 [账号管理](https://api.stao-ai.com/admin/accounts)。编辑官方 OpenAI API Key 账号，启用“显示 OpenAI 官方账单”并填写组织的 Admin API Key 后，原用量列会显示今日、本月费用和本月生成用量。项目 ID 留空时统计整个组织，日期按 UTC 计算，页面停留期间每五分钟刷新。
 
 本次构建以线上源码 `dece26153` 为基础加入账单功能，并保留线上已有的 GPT Image 账号测试兼容处理。部署源码保存在 `codex/korea-openai-usage` 分支，实际构建提交为 `a504158ca`。
 
-- 运行镜像为 `sub2api-local:0.2.19-openai-usage-a504158ca`。
+- 该次运行镜像为 `sub2api-local:0.2.19-openai-usage-a504158ca`。
 - 构建包、校验信息和部署回执位于服务器 `/opt/sub2api/patches/openai-usage-20261112/`。
 - 数据库、应用数据及原部署配置备份位于 `/var/backups/sub2api/openai-usage-20261112T045158Z/`。需要回退时，用其中的 `compose.override.yml` 恢复 `/opt/sub2api/compose.override.yml`，在该目录执行 `docker compose -f compose.yml -f compose.override.yml up -d --no-deps --pull never sub2api`，恢复原镜像 `sub2api-local:0.2.19-image-test-fix`。
 - 已核对容器与公网健康检查、线上版本、原账号编辑窗口、新查询接口以及公网账号页面资源的 SHA-256。上线时账号尚未配置 Admin API Key，真实 OpenAI 消费金额需配置后核对。

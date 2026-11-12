@@ -762,6 +762,10 @@ OAuth / Setup Token 图片请求使用 Responses 主控模型调用 `image_gener
 
 ---
 
+## 韩国生产的代码来源
+
+本仓库的 `codex/tiny-tao-alipay-sandbox` 是韩国 tiny-tao api 的唯一发布分支。本地工作目录、GitHub 远端分支、服务器 `/opt/sub2api/source` 源码和运行镜像使用同一个提交号。当前部署回执位于服务器 `/opt/sub2api/current-release.json`，记录源码提交、镜像、二进制校验和及回退版本。具体操作见 [部署说明](deploy/README.md#韩国生产的统一发布来源)。
+
 ## 文字转语音与 Rime 接入
 
 应用通过统一的 `POST /v1/audio/speech` 接口提交文本、模型和音色，网关负责鉴权、账号调度、音频流转发和计费。当前提供 Rime 的 Coda、Mist v3 适配，供应商请求转换集中在独立适配文件中。

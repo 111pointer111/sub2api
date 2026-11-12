@@ -846,6 +846,10 @@ Administrators can override automatic media eligibility through the account crea
 
 ---
 
+## Production source for the Korea deployment
+
+`codex/tiny-tao-alipay-sandbox` in this fork is the production branch for tiny-tao api. The local checkout, GitHub branch, server checkout at `/opt/sub2api/source` and running image use the same commit. `/opt/sub2api/current-release.json` records the source revision, image, binary checksum and rollback version. See the [deployment guide](deploy/README.md#韩国生产的统一发布来源).
+
 ## Text-to-speech and Rime
 
 Applications send text, model and voice to `POST /v1/audio/speech`. The gateway handles authentication, account scheduling, streaming audio and billing. Rime Coda and Mist v3 are supported through a separate native-request adapter.
