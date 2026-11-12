@@ -3057,6 +3057,7 @@ func (s *AccountTestService) testOpenAIImageAPIKey(c *gin.Context, ctx context.C
 
 	s.sendEvent(c, TestEvent{Type: "test_start", Model: modelID})
 
+	// GPT Image models return base64 images by default and reject response_format.
 	payload := map[string]any{
 		"model":  modelID,
 		"prompt": prompt,
