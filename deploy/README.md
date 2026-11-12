@@ -664,6 +664,7 @@ gateway:
 - 当前部署回执为 `/opt/sub2api/current-release.json`，包含提交号、镜像、二进制 SHA-256、前端资源校验和与备份位置。
 - 每次构建包与部署回执保存在 `/opt/sub2api/patches/` 下对应版本目录，数据库、应用数据和 Compose 配置备份保存在 `/var/backups/sub2api/`。
 - 更新服务使用现有 `compose.yml` 与 `compose.override.yml`，替换应用镜像后检查内网、公网健康与前端资源。回退入口保存在同一部署回执中。
+- 复用现有运行环境时，使用 `deploy/Dockerfile.runtime-overlay` 打包预编译程序。构建目录中放入同一提交构建的 `sub2api`，通过 `RUNTIME_IMAGE`、`COMMIT`、`VERSION` 构建参数标明基线镜像和版本。复制程序时固定 `0755` 执行权限，适用于解压后原文件缺少执行权限的情况。
 
 核对代码来源时，在本地仓库检查当前提交和 GitHub 分支，再检查服务器源码与运行程序。
 

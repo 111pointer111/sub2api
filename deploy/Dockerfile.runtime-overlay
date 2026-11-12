@@ -1,0 +1,13 @@
+# Reuse an existing runtime when shipping a prebuilt, embedded-frontend binary.
+ARG RUNTIME_IMAGE=sub2api-local:0.2.19-openai-usage-a504158ca
+FROM ${RUNTIME_IMAGE}
+
+ARG COMMIT
+ARG VERSION
+
+# Archives do not necessarily preserve the executable bit.
+COPY --chmod=0755 --chown=sub2api:sub2api sub2api /app/sub2api
+
+LABEL org.opencontainers.image.source="https://github.com/111pointer111/sub2api" \
+      org.opencontainers.image.revision="${COMMIT}" \
+      org.opencontainers.image.version="${VERSION}"
