@@ -846,6 +846,28 @@ Administrators can override automatic media eligibility through the account crea
 
 ---
 
+## Text-to-speech and Rime
+
+Applications send text, model and voice to `POST /v1/audio/speech`. The gateway handles authentication, account scheduling, streaming audio and billing. Rime Coda and Mist v3 are supported through a separate native-request adapter.
+
+1. Create a **Rime** API-key account and attach it to a Rime group. The default base URL is `https://coda.api.rime.ai`. Requests for `mistv3` automatically use the official Mist host. Custom base URLs are complete TTS endpoints.
+2. Configure the group's **TTS price per million characters**, then create a Sub2API API key for applications.
+3. Send `model`, `input` and `voice`. `GET /v1/models` lists `coda` and `mistv3`, subject to the account model configuration and group allowlist.
+
+```bash
+curl "$SUB2API_BASE_URL/v1/audio/speech" \
+  -H "Authorization: Bearer $SUB2API_API_KEY" \
+  -H 'Content-Type: application/json' \
+  --fail --output speech.mp3 \
+  -d '{"model":"coda","input":"Hello from Sub2API.","voice":"astra","response_format":"mp3"}'
+```
+
+Rime accepts up to 1,000 input characters per request. `response_format` defaults to `mp3`, with `wav`, `pcm`, `opus` (Ogg), `webm` and `mulaw` also supported. Optional `speed` ranges from `0.4` to `2.5`, with higher values producing faster speech. `lang` and `samplingRate` select the language and sample rate.
+
+Usage is measured in Unicode input characters. The group price uses USD per million characters, multiplied by the group rate. A blank price uses the existing gateway default of `$15/million characters`, and `0` makes usage free. Configure this gateway charge to match your pricing and upstream costs. Retryable upstream failures can switch accounts before audio starts. Interrupted streams retain the synthesis usage once audio has started. The account connection test generates a short English audio clip and incurs upstream synthesis usage.
+
+Voice and language combinations and native audio formats follow the official documentation. [Voice catalog](https://docs.rime.ai/docs/voices), [HTTP reference](https://docs.rime.ai/api-reference/coda/http).
+
 ## TypeSafe / Jev Support
 
 Sub2API supports TypeSafe API-key accounts through Jev's native, non-streaming System One protocol.

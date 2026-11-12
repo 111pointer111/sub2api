@@ -1116,6 +1116,11 @@ export default {
         longContextHint: 'When checked, channel intervals or official preset tiers apply. Otherwise the first tier is used unless the account explicitly enables long-context billing.',
         add: 'Add model price'
       },
+      speechPricing: {
+        modelDescription: 'Override TTS prices per model. Select per-request billing and enter the price per million input characters.',
+        title: 'Text-to-speech pricing',
+        description: 'USD per million input characters, multiplied by the group rate. Leave blank for the default price of 15, or enter 0 for free usage.'
+      },
       voicePricing: {
         title: 'Grok Voice Pricing',
         description: 'Optional per-group prices for Voice realtime / TTS / STT (USD). Leave empty to leave unpriced.',

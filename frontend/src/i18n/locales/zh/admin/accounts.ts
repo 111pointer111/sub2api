@@ -766,6 +766,7 @@ export default {
       addMethod: '添加方式',
       setupTokenLongLived: 'Setup Token（长期有效）',
       baseUrl: 'Base URL',
+      rimeBaseUrlHint: '默认按模型选择 Coda 或 Mist v3 官方地址。使用自定义服务时，填写完整的语音合成接口地址。',
       baseUrlHint: '留空使用官方 Anthropic API',
       apiKeyRequired: 'API Key *',
       apiKeyPlaceholder: 'sk-ant-api03-...',

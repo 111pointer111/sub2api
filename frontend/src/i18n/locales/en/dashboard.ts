@@ -189,6 +189,10 @@ export default {
         description: 'Call Jev through the native TypeSafe System One endpoint.',
         note: 'System One is non-streaming and is not compatible with Chat Completions, Responses, Claude Code, or Codex clients.',
       },
+      rime: {
+        description: 'Generate and save Rime Coda or Mist v3 audio through the shared text-to-speech endpoint.',
+        note: 'Set model to coda or mistv3 and voice to a Rime speaker name. Each request accepts up to 1,000 characters and uses the group TTS price.'
+      },
       antigravity: {
         description: 'Configure API access for Antigravity group. Select the configuration method based on your client.',
         claudeCode: 'Claude Code',

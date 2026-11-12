@@ -762,6 +762,31 @@ OAuth / Setup Token 图片请求使用 Responses 主控模型调用 `image_gener
 
 ---
 
+## 文字转语音与 Rime 接入
+
+应用通过统一的 `POST /v1/audio/speech` 接口提交文本、模型和音色，网关负责鉴权、账号调度、音频流转发和计费。当前提供 Rime 的 Coda、Mist v3 适配，供应商请求转换集中在独立适配文件中。
+
+1. 在账号管理中选择 **Rime**，填写 Rime API Key，关联 Rime 分组。默认地址为 `https://coda.api.rime.ai`，调用 `mistv3` 时会自动选择 Mist 官方地址。自定义地址按完整 TTS 端点使用。
+2. 在分组中配置 **TTS 每百万字符价格**，为该分组创建供应用调用的 Sub2API API Key。
+3. 调用统一接口，`voice` 填 Rime 音色名称。`GET /v1/models` 返回 `coda` 和 `mistv3`，账号配置的模型白名单和映射继续生效。
+
+```bash
+curl "$SUB2API_BASE_URL/v1/audio/speech" \
+  -H "Authorization: Bearer $SUB2API_API_KEY" \
+  -H 'Content-Type: application/json' \
+  --fail --output speech.mp3 \
+  -d '{"model":"coda","input":"Hello from Sub2API.","voice":"astra","response_format":"mp3"}'
+```
+
+- `model`、`input`、`voice` 必填。Rime 单次输入最多 1000 个字符。
+- `response_format` 默认 `mp3`，也支持 `wav`、`pcm`、`opus`（Ogg）、`webm` 和 `mulaw`。
+- 可选 `speed` 范围为 `0.4` 到 `2.5`，数值越大语速越快。可选 `lang`、`samplingRate` 分别指定语言和采样率。
+- 使用量按原始输入的 Unicode 字符数计量，分组单价以 USD/百万字符填写，再应用分组倍率。留空沿用网关现有默认价 `$15/百万字符`，填 `0` 表示免费。该价格是网关扣费设置，应根据自己的上游成本配置。
+- 开始返回音频前遇到可重试的上游错误，会按现有策略切换账号。音频已开始返回后发生中断，会保留本次合成的使用量。
+- 账号的连接测试会发送一小段英文，并返回可播放的测试音频，会产生上游语音合成用量。
+
+音色和语言搭配、原生参数及音频格式见官方文档。[Rime 音色目录](https://docs.rime.ai/docs/voices)、[HTTP 文档](https://docs.rime.ai/api-reference/coda/http)。
+
 ## TypeSafe / Jev 使用说明
 
 Sub2API 支持使用 TypeSafe API Key 账户，通过 Jev 原生、非流式的 System One 协议调用模型。

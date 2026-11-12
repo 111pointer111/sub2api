@@ -35,6 +35,29 @@ function readBlobAsText(blob: Blob): Promise<string> {
 }
 
 describe('UseKeyModal', () => {
+  it('shows Rime speech examples for Unix, CMD and PowerShell', async () => {
+    const wrapper = mount(UseKeyModal, {
+      props: { show: true, apiKey: 'sk-rime-test', baseUrl: 'https://example.com/v1', platform: 'rime' },
+      global: {
+        stubs: {
+          BaseDialog: { template: '<div><slot /><slot name="footer" /></div>' },
+          Icon: { template: '<span />' }
+        }
+      }
+    })
+    expect(wrapper.find('nav[aria-label="Client"]').text()).toBe('TTS API')
+    for (const shell of ['macOS / Linux', 'Windows CMD', 'PowerShell']) {
+      const tab = wrapper.findAll('button').find(button => button.text().trim() === shell)
+      expect(tab).toBeDefined()
+      await tab!.trigger('click')
+      const code = wrapper.find('pre code').text()
+      expect(code).toContain('https://example.com/v1/audio/speech')
+      expect(code).toContain('speech.mp3')
+      expect(code).toContain('astra')
+      expect(code).not.toContain('ANTHROPIC_BASE_URL')
+      if (shell === 'PowerShell') expect(code).toContain('Invoke-WebRequest')
+    }
+  })
   afterEach(() => {
     vi.unstubAllGlobals()
     saveAsMock.mockClear()

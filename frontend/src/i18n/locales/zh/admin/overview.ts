@@ -1113,6 +1113,11 @@ export default {
         longContextHint: '勾选后按渠道区间或官方预设阶梯计费；关闭后默认按第一档，账号显式开启时除外。',
         add: '添加模型价格'
       },
+      speechPricing: {
+        modelDescription: '按模型覆盖 TTS 单价。计费方式选择“按次”，价格按每百万输入字符填写。',
+        title: '文字转语音定价',
+        description: '按输入字符计费（USD/百万字符），实际扣费叠加分组倍率。留空沿用默认单价 15，填 0 表示免费。'
+      },
       voicePricing: {
         title: 'Grok Voice 定价',
         description: '分组级 Voice realtime / TTS / STT 单价（USD）。留空表示未配置。',

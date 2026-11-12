@@ -106,6 +106,33 @@ func newGatewayModelsHandlerForTest(repo service.AccountRepository, routeRepo ..
 	}
 }
 
+func TestGatewayRimeModelsUseSpeechCatalogAndAllowlist(t *testing.T) {
+	const groupID int64 = 7785
+	h := newGatewayModelsHandlerForTest(&gatewayModelsAccountRepoStub{})
+	for _, restricted := range []bool{false, true} {
+		group := &service.Group{ID: groupID, Platform: service.PlatformRime}
+		group.ModelAllowlist = service.GroupModelAllowlist{Enabled: restricted, Models: []string{"coda"}}
+		recorder := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(recorder)
+		c.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+		c.Set(string(middleware2.ContextKeyAPIKey), &service.APIKey{Group: group})
+		h.Models(c)
+		var response gatewayModelsResponseForTest
+		require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+		want := service.RimeSpeechModelIDs
+		if restricted {
+			want = []string{"coda"}
+		}
+		ids := make([]string, 0, len(response.Data))
+		for _, model := range response.Data {
+			require.Equal(t, "rime", model.OwnedBy)
+			require.Equal(t, "model", model.Object)
+			ids = append(ids, model.ID)
+		}
+		require.ElementsMatch(t, want, ids)
+	}
+}
+
 func TestGatewayCompositeRouteModelsAppearInBothCatalogs(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	const groupID int64 = 7784
