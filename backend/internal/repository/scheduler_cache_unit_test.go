@@ -1223,3 +1223,11 @@ func TestBuildSchedulerMetadataAccount_KeepsRPMFieldsForRPMGate(t *testing.T) {
 			"投影裁掉 rpm_strategy 会让粘性豁免账号退回三区判定")
 	})
 }
+
+func TestFishPrivateVoiceSurvivesSchedulerProjection(t *testing.T) {
+	const id = "0123456789abcdef0123456789abcdef"
+	original := service.Account{Platform: service.PlatformFish, Type: service.AccountTypeAPIKey, Credentials: map[string]any{"fish_voice_ids": id}}
+	meta := buildSchedulerMetadataAccount(original)
+	require.True(t, meta.SupportsOpenAIEndpointCapability(service.FishVoiceCapability(id)))
+	require.False(t, meta.SupportsOpenAIEndpointCapability(service.FishVoiceCapability("123456789abcdef0123456789abcdef0")))
+}
