@@ -223,6 +223,11 @@ func (s *AccountTestService) FetchUpstreamSupportedModels(ctx context.Context, a
 // snapshot. When no model is complete, the existing account snapshot is left
 // untouched.
 func (s *AccountTestService) SyncUpstreamModelCatalog(ctx context.Context, account *Account) (*UpstreamModelCatalog, error) {
+	// Fish's /model endpoint lists voices. Its supported synthesis and ASR
+	// models come from the gateway adapter, including in the creation preview.
+	if account != nil && account.Platform == PlatformFish && account.Type == AccountTypeAPIKey {
+		return &UpstreamModelCatalog{Models: append([]string(nil), FishModelIDs...), DiscoverySource: "provider_catalog"}, nil
+	}
 	fetched, err := s.fetchUpstreamModelListWithObservation(ctx, account)
 	var (
 		models          []string

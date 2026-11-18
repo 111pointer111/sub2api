@@ -91,3 +91,10 @@ func TestTranscriptionRoutingAndAudioUsage(t *testing.T) {
 	_, err = ParseTranscriptionRequest(duplicate.Bytes(), d.FormDataContentType())
 	require.ErrorContains(t, err, "duplicate")
 }
+
+func TestFishModelSyncUsesSpeechCatalogWithoutFetchingVoices(t *testing.T) {
+	catalog, err := (&AccountTestService{}).SyncUpstreamModelCatalog(context.Background(), &Account{Platform: PlatformFish, Type: AccountTypeAPIKey})
+	require.NoError(t, err)
+	require.Equal(t, FishModelIDs, catalog.Models)
+	require.Equal(t, "provider_catalog", catalog.DiscoverySource)
+}
