@@ -2819,10 +2819,14 @@ func (h *AccountHandler) GetAvailableModels(c *gin.Context) {
 }
 
 func (h *AccountHandler) respondAvailableModels(c *gin.Context, account *service.Account) {
-	if account.Platform == service.PlatformRime {
-		models := make([]openai.Model, 0, len(service.RimeSpeechModelIDs))
-		for _, id := range service.RimeSpeechModelIDs {
-			models = append(models, openai.Model{ID: id, Object: "model", OwnedBy: service.PlatformRime})
+	if account.Platform == service.PlatformRime || account.Platform == service.PlatformFish {
+		ids := service.RimeSpeechModelIDs
+		if account.Platform == service.PlatformFish {
+			ids = service.FishModelIDs
+		}
+		models := make([]openai.Model, 0, len(ids))
+		for _, id := range ids {
+			models = append(models, openai.Model{ID: id, Object: "model", OwnedBy: account.Platform})
 		}
 		response.Success(c, models)
 		return

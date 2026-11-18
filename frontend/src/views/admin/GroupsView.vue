@@ -1511,7 +1511,7 @@
 
         <!-- 语音按字符计费，Grok 另提供搜索、识别和实时语音定价 -->
         <div
-          v-if="createForm.platform === 'grok' || createForm.platform === 'rime'"
+          v-if="['grok', 'rime', 'fish', 'composite', 'openai'].includes(createForm.platform)"
           class="border-t border-gray-200 dark:border-dark-400 pt-4 mt-4"
         >
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -1557,7 +1557,7 @@
                 data-testid="create-audio-tts-price"
               />
             </div>
-            <div v-if="createForm.platform === 'grok'">
+            <div v-if="createForm.platform !== 'rime'">
               <label class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
               <input
                 v-model.number="createForm.audio_stt_price_per_hour"
@@ -3175,7 +3175,7 @@
 
         <!-- 语音按字符计费，Grok 另提供搜索、识别和实时语音定价 -->
         <div
-          v-if="editForm.platform === 'grok' || editForm.platform === 'rime'"
+          v-if="['grok', 'rime', 'fish', 'composite', 'openai'].includes(editForm.platform)"
           class="border-t border-gray-200 dark:border-dark-400 pt-4 mt-4"
         >
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -3221,7 +3221,7 @@
                 data-testid="edit-audio-tts-price"
               />
             </div>
-            <div v-if="editForm.platform === 'grok'">
+            <div v-if="editForm.platform !== 'rime'">
               <label class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
               <input
                 v-model.number="editForm.audio_stt_price_per_hour"

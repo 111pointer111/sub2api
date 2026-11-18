@@ -535,6 +535,7 @@ export function getModelsByPlatform(platform: string): string[] {
       'hy4-preview', 'hy3', 'omen-alpha'
     ]
     case 'typesafe': return ['jev-latest']
+    case 'fish': return ['s2-pro', 's2.1-pro', 's2.1-pro-free', 'drama-3', 'transcribe-1-pro']
     case 'rime': return ['coda', 'mistv3']
     case 'doubao': return doubaoModels
     case 'minimax': return minimaxModels
@@ -551,7 +552,7 @@ export function getModelsByPlatform(platform: string): string[] {
 
 // 按平台获取预设映射
 export function getPresetMappingsByPlatform(platform: string) {
-  if (platform === 'rime') return []
+  if (platform === 'rime' || platform === 'fish') return []
   if (platform === 'openai') return openaiPresetMappings
   if (platform === 'gemini') return geminiPresetMappings
   if (platform === 'grok' || platform === 'xai') return grokPresetMappings

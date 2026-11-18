@@ -16,6 +16,12 @@ import (
 
 // Speech handles the shared text-to-speech HTTP endpoint.
 func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
+	h.audio(c, false)
+}
+func (h *OpenAIGatewayHandler) Transcribe(c *gin.Context) {
+	h.audio(c, true)
+}
+func (h *OpenAIGatewayHandler) audio(c *gin.Context, transcribe bool) {
 	apiKey, ok := middleware2.GetAPIKeyFromContext(c)
 	if !ok || apiKey.Group == nil {
 		h.errorResponse(c, http.StatusUnauthorized, "authentication_error", "Invalid API key")
@@ -39,25 +45,48 @@ func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
 		}
 		return
 	}
-	speech, err := service.ParseSpeechRequest(body)
+	var speech *service.SpeechRequest
+	var transcript *service.TranscriptionRequest
+	var model string
+	var estimate service.InflightEstimateRequest
+	endpoint := "audio/speech"
+	capability := service.OpenAIEndpointCapabilitySpeech
+	if transcribe {
+		transcript, err = service.ParseTranscriptionRequest(body, c.GetHeader("Content-Type"))
+		if err == nil {
+			model = transcript.Model
+			estimate = grokVoiceInflightEstimate("stt", transcript.Audio)
+		}
+		capability = service.OpenAIEndpointCapabilityTranscription
+		endpoint = "audio/transcriptions"
+	} else {
+		speech, err = service.ParseSpeechRequest(body)
+		if err == nil {
+			model = speech.Model
+			estimate = service.InflightEstimateRequest{Kind: service.InflightEstimateAudio, AudioMode: "tts", AudioUnits: float64(utf8.RuneCountInString(speech.Input)) / 1e6}
+		}
+	}
 	if err != nil {
-		h.errorResponse(c, http.StatusBadRequest, "invalid_request_error", err.Error())
+		h.errorResponse(c, 400, "invalid_request_error", err.Error())
 		return
 	}
-	ensureCompositeTargetPlatform(c, apiKey, speech.Model)
+	ensureCompositeTargetPlatform(c, apiKey, model)
 	platform := effectiveAPIKeyPlatform(c, apiKey)
-	if platform != service.PlatformRime {
-		h.errorResponse(c, http.StatusNotFound, "not_found_error", "Speech API is not supported for this platform")
+	if (transcribe && platform != service.PlatformFish && platform != service.PlatformOpenAI) || (!transcribe && platform != service.PlatformFish && platform != service.PlatformRime) {
+		h.errorResponse(c, http.StatusNotFound, "not_found_error", "Audio endpoint is not supported for this platform")
 		return
 	}
-	setOpsRequestContext(c, speech.Model, true)
-	setOpsEndpointContext(c, "", int16(service.RequestTypeStream))
-	auditBody, _ := json.Marshal(map[string]any{
-		"messages": []map[string]any{{"role": "user", "content": speech.Input}},
-	})
-	if decision := h.checkSecurityAudit(c, reqLog, apiKey, subject, service.ContentModerationProtocolOpenAIChat, speech.Model, auditBody); decision != nil && !decision.AllowNextStage {
-		h.openAISecurityAuditError(c, decision)
-		return
+	setOpsRequestContext(c, model, !transcribe)
+	if !transcribe {
+		setOpsEndpointContext(c, "", int16(service.RequestTypeStream))
+		if platform == service.PlatformFish {
+			capability = service.FishVoiceCapability(speech.Voice)
+		}
+		auditBody, _ := json.Marshal(map[string]any{"messages": []map[string]any{{"role": "user", "content": speech.Input}}})
+		if decision := h.checkSecurityAudit(c, reqLog, apiKey, subject, service.ContentModerationProtocolOpenAIChat, model, auditBody); decision != nil && !decision.AllowNextStage {
+			h.openAISecurityAuditError(c, decision)
+			return
+		}
 	}
 	streamStarted := false
 	userRelease, acquired := h.acquireResponsesUserSlot(c, subject.UserID, subject.Concurrency, false, &streamStarted, reqLog)
@@ -76,12 +105,10 @@ func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
 		h.errorResponse(c, status, code, message)
 		return
 	}
-	channelMapping, _ := h.gatewayService.ResolveChannelMappingAndRestrict(c.Request.Context(), apiKey.GroupID, speech.Model)
-	forwardModel := openAIChannelForwardModel(channelMapping, speech.Model)
-	inflightDone, err := reserveInflightBalance(c, h.billingCacheService, h.gatewayService, apiKey, subscription, service.InflightEstimateRequest{
-		Model: forwardModel, Kind: service.InflightEstimateAudio, AudioMode: "tts",
-		AudioUnits: float64(utf8.RuneCountInString(speech.Input)) / 1e6,
-	})
+	channelMapping, _ := h.gatewayService.ResolveChannelMappingAndRestrict(c.Request.Context(), apiKey.GroupID, model)
+	forwardModel := openAIChannelForwardModel(channelMapping, model)
+	estimate.Model = forwardModel
+	inflightDone, err := reserveInflightBalance(c, h.billingCacheService, h.gatewayService, apiKey, subscription, estimate)
 	if err != nil {
 		status, code, message, _ := billingErrorDetails(err)
 		h.errorResponse(c, status, code, message)
@@ -97,7 +124,7 @@ func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
 	for attempt := 0; attempt <= maxSwitches; attempt++ {
 		selection, _, err := h.gatewayService.SelectAccountWithSchedulerForCapability(
 			c.Request.Context(), apiKey.GroupID, "", "", forwardModel, failed,
-			service.OpenAIUpstreamTransportHTTPSSE, service.OpenAIEndpointCapabilitySpeech,
+			service.OpenAIUpstreamTransportHTTPSSE, capability,
 			false, false, false, platform,
 		)
 		if err != nil || selection == nil || selection.Account == nil {
@@ -114,11 +141,14 @@ func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
 		}
 		result, forwardErr := func() (*service.OpenAIForwardResult, error) {
 			defer release()
+			if transcribe {
+				return h.gatewayService.ForwardTranscription(c.Request.Context(), c, account, transcript, forwardModel)
+			}
 			return h.gatewayService.ForwardSpeech(c.Request.Context(), c, account, speech, forwardModel)
 		}()
 		if result != nil {
 			// An interrupted audio stream still consumed synthesis work upstream.
-			h.recordAudioUsage(c, apiKey, account, subscription, "audio/speech", body, result)
+			h.recordAudioUsage(c, apiKey, account, subscription, endpoint, body, result)
 			if forwardErr != nil {
 				reqLog.Info("speech.stream_interrupted", zap.Error(forwardErr))
 			}
@@ -135,6 +165,6 @@ func (h *OpenAIGatewayHandler) Speech(c *gin.Context) {
 	if last != nil {
 		h.handleFailoverExhausted(c, last, false)
 	} else {
-		h.errorResponse(c, http.StatusServiceUnavailable, "api_error", "No available speech accounts")
+		h.errorResponse(c, http.StatusServiceUnavailable, "api_error", "No available accounts for this audio model and voice")
 	}
 }

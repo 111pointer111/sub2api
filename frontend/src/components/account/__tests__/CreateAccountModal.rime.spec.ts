@@ -24,7 +24,7 @@ describe('Rime account setup', () => {
 
   it('exposes TTS group pricing on create and edit', () => {
     for (const form of ['createForm', 'editForm']) {
-      expect(groupSource).toContain(`${form}.platform === 'grok' || ${form}.platform === 'rime'`)
+      expect(groupSource).toContain(`['grok', 'rime', 'fish', 'composite', 'openai'].includes(${form}.platform)`)
       expect(groupSource).toContain(`v-model.number="${form}.audio_tts_price_per_million_chars"`)
       expect(groupSource).toContain(`v-if="${form}.platform !== 'rime'"`)
     }

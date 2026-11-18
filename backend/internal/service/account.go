@@ -1918,6 +1918,24 @@ func (a *Account) SupportsOpenAIEndpointCapability(capability OpenAIEndpointCapa
 	if a == nil {
 		return false
 	}
+	if a.Platform == PlatformFish {
+		if a.Type != AccountTypeAPIKey {
+			return false
+		}
+		if capability == OpenAIEndpointCapabilityTranscription {
+			return true
+		}
+		if voice, ok := strings.CutPrefix(string(capability), fishVoiceCapabilityPrefix); ok {
+			return a.HasFishVoice(voice)
+		}
+		return capability == OpenAIEndpointCapabilitySpeech
+	}
+	if capability == OpenAIEndpointCapabilityTranscription {
+		return a.Platform == PlatformOpenAI && a.Type == AccountTypeAPIKey
+	}
+	if strings.HasPrefix(string(capability), fishVoiceCapabilityPrefix) {
+		return false
+	}
 	if a.Platform == PlatformRime || capability == OpenAIEndpointCapabilitySpeech {
 		return a.Platform == PlatformRime && a.Type == AccountTypeAPIKey && capability == OpenAIEndpointCapabilitySpeech
 	}

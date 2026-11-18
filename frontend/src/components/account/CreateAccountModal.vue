@@ -1198,6 +1198,11 @@
           />
           <p class="input-hint">{{ t('admin.accounts.upstream.apiKeyHint') }}</p>
         </div>
+        <label v-if="form.platform === 'fish'" class="input-label">
+          {{ t('admin.accounts.fishVoiceIds') }}
+          <textarea v-model="fishVoiceIds" class="input font-mono" rows="2" />
+        </label>
+
         <!-- 上游倍率自动探测：antigravity upstream 也是 API-key 账号 -->
         <div class="flex items-center justify-between gap-4 border-t border-gray-200 pt-4 dark:border-dark-600">
           <div>
@@ -1561,6 +1566,11 @@
           />
           <p v-if="apiKeyHint" class="input-hint">{{ apiKeyHint }}</p>
         </div>
+
+        <label v-if="form.platform === 'fish'" class="input-label">
+          {{ t('admin.accounts.fishVoiceIds') }}
+          <textarea v-model="fishVoiceIds" class="input font-mono" rows="2" />
+        </label>
 
         <!-- 上游倍率自动探测：全部 API-key 平台可用（所在区块已限定 apikey 类型） -->
         <div
@@ -4265,7 +4275,7 @@ const apiKeyHint = computed(() => {
   if (form.platform === 'openai') return t('admin.accounts.openai.apiKeyHint')
   if (form.platform === 'gemini') return t('admin.accounts.gemini.apiKeyHint')
   // Grok 与多协议供应商没有对应的说明文案；通用文案指 Claude Console Key。
-  if (form.platform === 'grok' || form.platform === 'rime' || isMultiProtocolPlatform.value) return ''
+  if (form.platform === 'fish' || form.platform === 'grok' || form.platform === 'rime' || isMultiProtocolPlatform.value) return ''
   return t('admin.accounts.apiKeyHint')
 })
 
@@ -4282,6 +4292,7 @@ const apiKeyBaseUrlPlaceholder = computed(() => {
       return 'https://generativelanguage.googleapis.com'
     case 'grok':
       return 'https://api.x.ai/v1'
+    case 'fish': return 'https://api.fish.audio'
     case 'rime':
       return 'https://coda.api.rime.ai'
     case 'typesafe':
@@ -4299,6 +4310,7 @@ const apiKeyValuePlaceholder = computed(() => {
       return 'AQ.Ab...'
     case 'grok':
       return 'xai-...'
+    case 'fish': return 'Fish Audio API Key'
     case 'rime':
       return 'Rime API Key'
     case 'kimi':
@@ -4399,6 +4411,7 @@ const submitting = ref(false)
 const accountCategory = ref<'oauth-based' | 'apikey' | 'bedrock' | 'service_account'>('oauth-based') // UI selection for account category
 const addMethod = ref<AddMethod>('oauth') // For oauth-based: 'oauth' or 'setup-token'
 const apiKeyBaseUrl = ref('https://api.anthropic.com')
+const fishVoiceIds = ref('')
 const apiKeyValue = ref('')
 const upstreamBillingAutoProbeEnabled = ref(true)
 
@@ -4430,7 +4443,7 @@ const isGenericMultiProtocolPlatform = computed(
 )
 const extraAPIKeyPlatforms = computed(() =>
   listPlatforms().filter(spec =>
-    spec.id === 'rime' || (!!spec.multi_protocol && !isCNProviderPlatform(spec.id) && spec.id !== 'opencode_go')
+    spec.id === 'fish' || spec.id === 'rime' || (!!spec.multi_protocol && !isCNProviderPlatform(spec.id) && spec.id !== 'opencode_go')
   )
 )
 const genericAccountModes = computed(() => providerAccountModes(form.platform))
@@ -4540,6 +4553,10 @@ function selectExtraAPIKeyPlatform(platform: string) {
   form.platform = platform
   form.type = 'apikey'
   accountCategory.value = 'apikey'
+  if (platform === 'fish') {
+    apiKeyBaseUrl.value = 'https://api.fish.audio'
+    return
+  }
   if (platform === 'rime') {
     apiKeyBaseUrl.value = 'https://coda.api.rime.ai'
     allowedModels.value = ['coda', 'mistv3']
@@ -5169,6 +5186,12 @@ watch(
     allowedModels.value = []
     upstreamModelsPreviewed.value = false
     modelMappings.value = []
+    if (newPlatform === 'fish') {
+      apiKeyBaseUrl.value = 'https://api.fish.audio'
+      accountCategory.value = 'apikey'
+      modelRestrictionMode.value = 'whitelist'
+      allowedModels.value = getModelsByPlatform('fish')
+    }
     if (newPlatform === 'rime') {
       accountCategory.value = 'apikey'
       modelRestrictionMode.value = 'whitelist'
@@ -5649,6 +5672,7 @@ const resetForm = () => {
   openCodeGoProtocolRules.value = cloneOpenCodeGoProtocolRules(defaultOpenCodeProtocolRules('zen'))
   adaptiveBaseUrls.value = { chat_completions: '', anthropic: '', responses: '' }
   apiKeyBaseUrl.value = 'https://api.anthropic.com'
+  fishVoiceIds.value = ''
   apiKeyValue.value = ''
   upstreamRequestIdHeader.value = ''
   upstreamBillingAutoProbeEnabled.value = true
@@ -6141,7 +6165,8 @@ const handleSubmit = async () => {
 
   // Build credentials with optional model mapping
   const credentials: Record<string, unknown> = {
-    base_url: apiKeyBaseUrl.value.trim() || defaultBaseUrl,
+    base_url: apiKeyBaseUrl.value.trim() || (form.platform === 'fish' ? 'https://api.fish.audio' : defaultBaseUrl),
+    ...(form.platform === 'fish' ? { fish_voice_ids: fishVoiceIds.value.trim() } : {}),
     api_key: apiKeyValue.value.trim()
   }
   if (form.platform === 'gemini' && isOfficialGeminiBaseUrl(apiKeyBaseUrl.value)) {

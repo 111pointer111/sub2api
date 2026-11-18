@@ -124,6 +124,10 @@ func DetectModelPlatform(model string) (string, bool) {
 	}
 
 	switch {
+	case IsFishModel(normalized):
+		return PlatformFish, true
+	case normalized == "whisper-1":
+		return PlatformOpenAI, true
 	case normalized == "coda", normalized == "mistv3":
 		return PlatformRime, true
 	case strings.HasPrefix(normalized, "anthropic.claude-"),

@@ -223,7 +223,7 @@ func NewAccountService(accountRepo AccountRepository, groupRepo GroupRepository)
 
 // Create 创建账号
 func (s *AccountService) Create(ctx context.Context, req CreateAccountRequest) (*Account, error) {
-	if (req.Platform == PlatformTypeSafe || req.Platform == PlatformRime) && req.Type != AccountTypeAPIKey {
+	if (req.Platform == PlatformTypeSafe || req.Platform == PlatformRime || req.Platform == PlatformFish) && req.Type != AccountTypeAPIKey {
 		return nil, fmt.Errorf("%s accounts only support apikey credentials", req.Platform)
 	}
 	// 验证分组是否存在（如果指定了分组）
@@ -521,7 +521,7 @@ func (s *AccountService) TestCredentials(ctx context.Context, id int64) error {
 	case PlatformTypeSafe:
 		// TypeSafe credentials are API keys; inference failures drive health and cooldown state.
 		return nil
-	case PlatformRime:
+	case PlatformRime, PlatformFish:
 		return nil
 	default:
 		if IsMultiProtocolAPIKeyProvider(account.Platform) {

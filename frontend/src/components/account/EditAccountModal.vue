@@ -26,6 +26,10 @@
         <p class="input-hint">{{ t('admin.accounts.notesHint') }}</p>
       </div>
 
+      <label v-if="account.platform === 'fish'" class="input-label">
+        {{ t('admin.accounts.fishVoiceIds') }}
+        <textarea v-model="fishVoiceIds" class="input font-mono" rows="2" />
+      </label>
       <!-- API Key fields (only for apikey type) -->
       <div v-if="account.type === 'apikey'" class="space-y-4">
         <div v-if="!isCNApiKeyAccount || editApiProtocol !== 'adaptive'">
@@ -3684,6 +3688,7 @@ interface TempUnschedRuleForm {
 
 // State
 const submitting = ref(false)
+const fishVoiceIds = ref('')
 const editBaseUrl = ref('https://api.anthropic.com')
 const editApiKey = ref('')
 const openAIPlatformUsageEnabled = ref(false)
@@ -4513,6 +4518,7 @@ const defaultBaseUrl = computed(() => {
   if (props.account?.platform === 'openai') return 'https://api.openai.com'
   if (props.account?.platform === 'gemini') return 'https://generativelanguage.googleapis.com'
   if (props.account?.platform === 'grok') return 'https://api.x.ai/v1'
+  if (props.account?.platform === 'fish') return 'https://api.fish.audio'
   if (props.account?.platform === 'rime') return 'https://coda.api.rime.ai'
   if (props.account?.platform === 'typesafe') return 'https://api.typesafe.ai'
   // CN 供应商：按当前模式/协议回落到官方预设（清空输入框提交时使用），
@@ -4654,6 +4660,7 @@ const syncFormFromAccount = (newAccount: Account | null) => {
 
   // Load intercept warmup requests setting (applies to all account types)
   const credentials = newAccount.credentials as Record<string, unknown> | undefined
+  fishVoiceIds.value = String(credentials?.fish_voice_ids ?? '')
   openAIPlatformUsageEnabled.value = newAccount.credentials_status?.has_openai_admin_api_key === true
   openAIAdminAPIKey.value = ''
   openAIUsageProjectID.value = typeof credentials?.openai_usage_project_id === 'string' ? credentials.openai_usage_project_id : ''
@@ -5720,7 +5727,8 @@ const handleSubmit = async () => {
       // Always update credentials for apikey type to handle model mapping changes
       const newCredentials: Record<string, unknown> = {
         ...currentCredentials,
-        base_url: newBaseUrl
+        base_url: newBaseUrl,
+        ...(props.account.platform === 'fish' ? { fish_voice_ids: fishVoiceIds.value.trim() } : {})
       }
 
       // 国产供应商：模式与协议写入凭据（决定额度/余额探测与转发端点/格式）。

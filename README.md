@@ -850,6 +850,12 @@ Administrators can override automatic media eligibility through the account crea
 
 `main` in this fork is the production branch for tiny-tao api. The local checkout, GitHub branch, server checkout at `/opt/sub2api/source` and running image use the same commit. `/opt/sub2api/current-release.json` records the source revision, image, binary checksum and rollback version. See the [deployment guide](deploy/README.md#韩国生产的统一发布来源).
 
+## Fish voices and audio research keys
+
+Add Fish Audio API-key accounts in account management. Register the voice IDs accessible to each account, one per line. Speech scheduling only selects accounts with the requested voice ID. Submit `model`, `input`, `voice` and `response_format` to `POST /v1/audio/speech`. Set `response_format` to `wav` and `samplingRate` to 24000 for voice-message audio.
+
+Use a composite group with a model allowlist for speech experiments. Attach Fish Audio or compatible OpenAI API-key accounts, then issue a dedicated group key with its own quota. Keep a separate key for applications. Submit multipart `model`, `file` and optional `language` to `POST /v1/audio/transcriptions` for a JSON response containing `text`. Fish uses `transcribe-1-pro`; OpenAI-compatible accounts use their upstream transcription model. If upstream host allowlisting is enabled, include the configured Fish host.
+
 ## Text-to-speech and Rime
 
 Applications send text, model and voice to `POST /v1/audio/speech`. The gateway handles authentication, account scheduling, streaming audio and billing. Rime Coda and Mist v3 are supported through a separate native-request adapter.

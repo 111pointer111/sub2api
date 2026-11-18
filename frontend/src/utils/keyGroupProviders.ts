@@ -20,7 +20,8 @@ const PROVIDER_BY_PLATFORM: Record<GroupPlatform, KeyGroupProvider> = {
   typesafe: 'other',
   command_code: 'other',
   cline: 'other',
-  rime: 'other'
+  rime: 'other',
+  fish: 'other'
 }
 
 export function getKeyGroupProvider(platform: GroupPlatform): KeyGroupProvider {

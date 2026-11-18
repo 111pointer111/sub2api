@@ -1214,6 +1214,10 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 		writeModelsList(c, platform, []string{typesafe.JevLatestModel})
 		return
 	}
+	if platform == service.PlatformFish {
+		writeModelsList(c, platform, service.FishModelIDs)
+		return
+	}
 	if platform == service.PlatformRime {
 		writeModelsList(c, platform, service.RimeSpeechModelIDs)
 		return
@@ -1343,7 +1347,7 @@ func (h *GatewayHandler) compositeAvailableModels(ctx context.Context, groupID *
 }
 
 func writeModelsList(c *gin.Context, platform string, modelIDs []string) {
-	if platform == service.PlatformRime {
+	if platform == service.PlatformRime || platform == service.PlatformFish {
 		models := make([]openai.Model, 0, len(modelIDs))
 		for _, id := range modelIDs {
 			models = append(models, openai.Model{ID: id, Object: "model", OwnedBy: platform})
@@ -1515,6 +1519,8 @@ func defaultModelIDsForPlatform(platform string) []string {
 		return service.DefaultOpenCodeGoModelIDs()
 	case service.PlatformTypeSafe:
 		return []string{"jev-latest"}
+	case service.PlatformFish:
+		return service.FishModelIDs
 	case service.PlatformRime:
 		return service.RimeSpeechModelIDs
 	case service.PlatformComposite:

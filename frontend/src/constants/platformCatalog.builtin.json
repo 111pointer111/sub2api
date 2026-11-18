@@ -284,6 +284,12 @@
       "display_name": "Rime",
       "gateway": "openai",
       "cn_provider": false
+    },
+    {
+      "id": "fish",
+      "display_name": "Fish Audio",
+      "gateway": "openai",
+      "cn_provider": false
     }
   ],
   "composite_precedence": [
@@ -300,6 +306,7 @@
     "typesafe",
     "command_code",
     "cline",
-    "rime"
+    "rime",
+    "fish"
   ]
 }

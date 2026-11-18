@@ -368,6 +368,7 @@ const defaultClientTab = computed(() => {
       return 'claude'
     case 'typesafe':
       return 'systemone'
+    case 'fish':
     case 'rime':
       return 'speech'
     default:
@@ -504,6 +505,7 @@ const clientTabs = computed((): TabConfig[] => {
       return [
         { id: 'systemone', label: t('keys.useKeyModal.cliTabs.systemOne'), icon: TerminalIcon }
       ]
+    case 'fish':
     case 'rime':
       return [{ id: 'speech', label: 'TTS API', icon: TerminalIcon }]
     case 'deepseek':
@@ -592,6 +594,7 @@ const platformDescription = computed(() => {
         : t('keys.useKeyModal.composite.description')
     case 'typesafe':
       return t('keys.useKeyModal.typesafe.description')
+    case 'fish': return t('keys.useKeyModal.fish.description')
     case 'rime':
       return t('keys.useKeyModal.rime.description')
     default:
@@ -653,6 +656,7 @@ const platformNote = computed(() => {
         : t('keys.useKeyModal.note')
     case 'typesafe':
       return t('keys.useKeyModal.typesafe.note')
+    case 'fish': return t('keys.useKeyModal.fish.note')
     case 'rime':
       return t('keys.useKeyModal.rime.note')
     default:
@@ -785,8 +789,10 @@ const currentFiles = computed((): FileConfig[] => {
   switch (props.platform) {
     case 'typesafe':
       return [generateSystemOneCurl(baseRoot, apiKey)]
+    case 'fish':
     case 'rime': {
-      const payload = JSON.stringify({ model: 'coda', input: 'Hello from Sub2API.', voice: 'astra', response_format: 'mp3' })
+      const fish = props.platform === 'fish'
+      const payload = JSON.stringify({ model: fish ? 's2.1-pro' : 'coda', input: 'Hello from Sub2API.', voice: fish ? 'YOUR_VOICE_ID' : 'astra', response_format: 'mp3' })
       if (activeTab.value === 'powershell') {
         return [{
           path: 'PowerShell',
@@ -1360,6 +1366,7 @@ function generateRoutedCodexFiles(
     command_code: 'Command Code',
     cline: 'Cline',
     rime: 'Rime',
+    fish: 'Fish Audio',
     composite: 'Composite'
   }
   const label = labels[platform]

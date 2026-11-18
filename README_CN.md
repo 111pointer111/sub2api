@@ -766,6 +766,12 @@ OAuth / Setup Token 图片请求使用 Responses 主控模型调用 `image_gener
 
 本仓库的 `main` 是韩国 tiny-tao api 的唯一发布分支。本地工作目录、GitHub 远端分支、服务器 `/opt/sub2api/source` 源码和运行镜像使用同一个提交号。当前部署回执位于服务器 `/opt/sub2api/current-release.json`，记录源码提交、镜像、二进制校验和及回退版本。具体操作见 [部署说明](deploy/README.md#韩国生产的统一发布来源)。
 
+## Fish 私有音色与语音研究分组
+
+在账号管理中选择 Fish Audio，录入上游 API Key 和该账号可用的音色 ID（每行一个）。可添加多个账号。转写无需填写音色。向 `POST /v1/audio/speech` 提交 `model`、`input`、`voice` 和 `response_format`，调度器只选择登记了该音色的账号。使用 `response_format=wav` 配合 `samplingRate=24000` 可为语音消息生成 WAV。
+
+语音研究可建立组合分组，关联 Fish 和支持转写的 OpenAI API Key 账号，把需要测试的模型加入分组白名单，为该分组创建独立的 Sub2API Key 并设置额度。微信业务使用单独的 Key。转写入口为 `POST /v1/audio/transcriptions`，multipart 字段为 `model`、`file` 和可选的 `language`，返回 JSON 的 `text`。Fish 使用 `transcribe-1-pro`，OpenAI 兼容账号使用其上游实际支持的模型。开启网关上游地址白名单时需包含配置的 Fish 主机。
+
 ## 文字转语音与 Rime 接入
 
 应用通过统一的 `POST /v1/audio/speech` 接口提交文本、模型和音色，网关负责鉴权、账号调度、音频流转发和计费。当前提供 Rime 的 Coda、Mist v3 适配，供应商请求转换集中在独立适配文件中。

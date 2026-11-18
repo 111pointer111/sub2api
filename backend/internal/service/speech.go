@@ -53,6 +53,8 @@ func (s *OpenAIGatewayService) ForwardSpeech(ctx context.Context, c *gin.Context
 	var request *http.Request
 	var err error
 	switch account.Platform {
+	case PlatformFish:
+		request, err = newFishSpeechRequest(ctx, account, speech, model, s.validateUpstreamBaseURL)
 	case PlatformRime:
 		request, err = newRimeSpeechRequest(ctx, account, speech, model, s.validateUpstreamBaseURL)
 	default:

@@ -189,6 +189,7 @@ export default {
         description: 'Call Jev through the native TypeSafe System One endpoint.',
         note: 'System One is non-streaming and is not compatible with Chat Completions, Responses, Claude Code, or Codex clients.',
       },
+      fish: { description: 'Synthesize or transcribe audio through Sub2API.', note: 'Use a Fish voice ID registered on the account. For transcription use /v1/audio/transcriptions.' },
       rime: {
         description: 'Generate and save Rime Coda or Mist v3 audio through the shared text-to-speech endpoint.',
         note: 'Set model to coda or mistv3 and voice to a Rime speaker name. Each request accepts up to 1,000 characters and uses the group TTS price.'
